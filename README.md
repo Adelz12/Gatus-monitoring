@@ -11,7 +11,7 @@ gatus/
 ├── docker-compose.yml   # وصفة تشغيل الحاوية
 ├── config/
 │   └── config.yaml       # إعدادات المراقبة (endpoints, security, storage)
-├── .env                   # متغيرات حساسة (غير مرفوعة على Git)
+├── .env                   
 └── .gitignore
 ```
 
