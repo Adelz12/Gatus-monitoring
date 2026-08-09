@@ -1,0 +1,52 @@
+security:
+  basic:
+    username: "${GATUS_USERNAME}"
+    password-bcrypt-base64: "${GATUS_PASSWORD_BCRYPT_BASE64}"
+
+storage:
+  type: sqlite
+  path: /data/data.db
+
+endpoints:
+  - name: wppconnect-api
+    group: internal
+    url: "http://10.0.6.6:21465/api-docs/"
+    interval: 30s
+    conditions:
+      - "[STATUS] == 200"
+      - "[BODY] != \"\""
+
+  - name: portainer
+    group: internal
+    url: "tcp://10.0.6.6:9000"
+    interval: 30s
+    conditions:
+      - "[CONNECTED] == true"
+
+  - name: botpress-admin
+    group: internal
+    url: "http://10.0.6.6:8183/admin/"
+    interval: 30s
+    conditions:
+      - "[STATUS] == 200"
+
+  - name: frappe
+    group: external
+    url: "http://service-bot-stage.fintechsys.net:8381/"
+    interval: 30s
+    conditions:
+      - "[STATUS] == 200"
+
+  - name: internal-server-ping
+    group: internal
+    url: "icmp://10.0.6.6"
+    interval: 30s
+    conditions:
+      - "[CONNECTED] == true"
+
+  - name: opensearch-dashboards
+    group: internal
+    url: "http://10.0.6.4:5601"
+    interval: 30s
+    conditions:
+      - "[STATUS] == any(200, 302)"
