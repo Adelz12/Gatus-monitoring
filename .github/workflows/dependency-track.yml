@@ -1,0 +1,36 @@
+name: Dependency-Track Image Scan
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  DTRACK_PROJECT_UUID: 07b39f05-31fb-4ea4-9833-64d3f8854e3d
+  IMAGE: twinproduction/gatus:latest
+
+jobs:
+  sbom-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate SBOM from image
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ env.IMAGE }}
+          format: cyclonedx-json
+          output-file: sbom.json
+          upload-artifact: false
+
+      - name: Upload SBOM to Dependency-Track
+        run: |
+          HTTP_CODE=$(curl -s -o response.txt -w "%{http_code}" -X POST \
+            "${{ secrets.DTRACK_URL }}/api/v1/bom" \
+            -H "X-Api-Key: ${{ secrets.DTRACK_API_KEY }}" \
+            -F "project=${{ env.DTRACK_PROJECT_UUID }}" \
+            -F "bom=@sbom.json")
+          echo "HTTP Status: $HTTP_CODE"
+          cat response.txt
+          if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
+            echo "Upload failed"
+            exit 1
+          fi
